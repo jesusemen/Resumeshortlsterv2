@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Form, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -18,6 +18,11 @@ sys.path.append(str(Path(__file__).parent))
 
 from services.document_parser import DocumentParser
 from services.resume_analyzer import ResumeAnalyzer
+
+# Import auth modules
+from auth.models import UserCreate, UserLogin, UserResponse, UserInDB, Token
+from auth.auth_handler import verify_password, get_password_hash, create_access_token
+from auth.dependencies import get_current_user
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -40,6 +45,7 @@ resume_analyzer = ResumeAnalyzer()
 # Models
 class AnalysisResult(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
     job_description_filename: str
     total_resumes: int
     candidates: List[dict]
@@ -53,6 +59,88 @@ class StatusCheck(BaseModel):
 
 class StatusCheckCreate(BaseModel):
     client_name: str
+
+# Auth routes
+@api_router.post("/auth/register", response_model=Token)
+async def register(user_data: UserCreate):
+    """Register a new user"""
+    # Check if user already exists
+    existing_user = await db.users.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+    
+    # Create new user
+    hashed_password = get_password_hash(user_data.password)
+    user_in_db = UserInDB(
+        email=user_data.email,
+        full_name=user_data.full_name,
+        hashed_password=hashed_password
+    )
+    
+    # Insert user into database
+    await db.users.insert_one(user_in_db.dict())
+    
+    # Create access token
+    access_token = create_access_token(data={"sub": user_in_db.id})
+    
+    # Return token and user info
+    user_response = UserResponse(
+        id=user_in_db.id,
+        email=user_in_db.email,
+        full_name=user_in_db.full_name,
+        created_at=user_in_db.created_at,
+        is_active=user_in_db.is_active
+    )
+    
+    return Token(access_token=access_token, user=user_response)
+
+@api_router.post("/auth/login", response_model=Token)
+async def login(user_data: UserLogin):
+    """Login user"""
+    # Find user by email
+    user = await db.users.find_one({"email": user_data.email})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    user_in_db = UserInDB(**user)
+    
+    # Verify password
+    if not verify_password(user_data.password, user_in_db.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    # Create access token
+    access_token = create_access_token(data={"sub": user_in_db.id})
+    
+    # Return token and user info
+    user_response = UserResponse(
+        id=user_in_db.id,
+        email=user_in_db.email,
+        full_name=user_in_db.full_name,
+        created_at=user_in_db.created_at,
+        is_active=user_in_db.is_active
+    )
+    
+    return Token(access_token=access_token, user=user_response)
+
+@api_router.get("/user/profile", response_model=UserResponse)
+async def get_user_profile(current_user: UserInDB = Depends(get_current_user)):
+    """Get current user profile"""
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        created_at=current_user.created_at,
+        is_active=current_user.is_active
+    )
 
 # Existing routes
 @api_router.get("/")
@@ -71,14 +159,15 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
-# New resume analysis endpoint
+# Protected resume analysis endpoint
 @api_router.post("/analyze-resumes")
 async def analyze_resumes(
     job_description: UploadFile = File(...),
-    resumes: List[UploadFile] = File(...)
+    resumes: List[UploadFile] = File(...),
+    current_user: UserInDB = Depends(get_current_user)
 ):
     """
-    Analyze resumes against job description
+    Analyze resumes against job description (Protected endpoint)
     """
     try:
         # Validate inputs
@@ -129,7 +218,7 @@ async def analyze_resumes(
                     'filename': resume.filename
                 })
         
-        logging.info(f"Processing {len(resume_data)} valid resumes")
+        logging.info(f"Processing {len(resume_data)} valid resumes for user {current_user.id}")
         
         if len(resume_data) < 30:
             raise HTTPException(
@@ -142,6 +231,7 @@ async def analyze_resumes(
         
         # Save results to database
         result_obj = AnalysisResult(
+            user_id=current_user.id,
             job_description_filename=job_description.filename,
             total_resumes=len(resume_data),
             candidates=analysis_results['candidates'],
@@ -170,12 +260,15 @@ async def analyze_resumes(
             detail=f"Internal server error: {str(e)}"
         )
 
-# Get analysis history
+# Get analysis history (protected)
 @api_router.get("/analysis-history")
-async def get_analysis_history():
-    """Get past analysis results"""
+async def get_analysis_history(current_user: UserInDB = Depends(get_current_user)):
+    """Get user's past analysis results"""
     try:
-        results = await db.analysis_results.find().sort("analysis_date", -1).to_list(10)
+        results = await db.analysis_results.find(
+            {"user_id": current_user.id}
+        ).sort("analysis_date", -1).to_list(10)
+        
         return [
             {
                 "id": result["id"],
