@@ -8,7 +8,7 @@ import { Separator } from './ui/separator';
 import { Progress } from './ui/progress';
 import { FileText, Upload, Users, Award, Phone, Mail, User } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
-import { getMockResults } from '../utils/mockData';
+import axios from 'axios';
 
 const ResumeAnalyzer = () => {
   const [jobDescription, setJobDescription] = useState(null);
