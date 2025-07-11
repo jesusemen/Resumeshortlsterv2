@@ -1,16 +1,22 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { LogOut, User, FileText, TrendingUp, Settings } from 'lucide-react';
+import { LogOut, User, FileText, TrendingUp, Settings, CreditCard, Crown } from 'lucide-react';
 import ResumeAnalyzer from './ResumeAnalyzer';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleUpgrade = () => {
+    navigate('/payment');
   };
 
   return (
@@ -32,13 +38,23 @@ const Dashboard = () => {
             </div>
             
             <div className="flex items-center space-x-4">
+              <Button
+                onClick={handleUpgrade}
+                variant="outline"
+                size="sm"
+                className="border-orange-300 hover:bg-orange-50 text-orange-600 hover:text-orange-700"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade to Premium
+              </Button>
+              
               <div className="flex items-center space-x-2">
                 <User className="w-4 h-4 text-gray-500" />
                 <span className="text-sm font-medium text-gray-700">
                   {user?.full_name || user?.email}
                 </span>
                 <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  Active
+                  Free
                 </Badge>
               </div>
               
@@ -60,7 +76,7 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-4 gap-6">
             <Card className="bg-white/60 backdrop-blur-sm border-blue-200">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -110,7 +126,25 @@ const Dashboard = () => {
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">Active</div>
                 <p className="text-sm text-gray-600 mt-1">
-                  Full access enabled
+                  Free tier enabled
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-orange-100 to-yellow-100 border-orange-200 cursor-pointer hover:shadow-lg transition-shadow" onClick={handleUpgrade}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-orange-600" />
+                  Upgrade Plan
+                </CardTitle>
+                <CardDescription>
+                  Unlock premium features
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">$2</div>
+                <p className="text-sm text-orange-700 mt-1">
+                  One-time payment
                 </p>
               </CardContent>
             </Card>
