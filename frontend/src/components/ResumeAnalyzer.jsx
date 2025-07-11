@@ -65,16 +65,40 @@ const ResumeAnalyzer = () => {
 
     setIsAnalyzing(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
-      const mockResults = getMockResults();
-      setResults(mockResults);
-      setIsAnalyzing(false);
-      toast({
-        title: "Analysis Complete",
-        description: "Resume analysis completed successfully!",
+    try {
+      const formData = new FormData();
+      formData.append('job_description', jobDescription);
+      
+      resumes.forEach((resume) => {
+        formData.append('resumes', resume);
       });
-    }, 3000);
+
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      const response = await axios.post(`${BACKEND_URL}/api/analyze-resumes`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        setResults(response.data.data);
+        toast({
+          title: "Analysis Complete",
+          description: "Resume analysis completed successfully!",
+        });
+      } else {
+        throw new Error(response.data.message || 'Analysis failed');
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      toast({
+        title: "Analysis Failed",
+        description: error.response?.data?.detail || "An error occurred during analysis.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const getRankBadgeColor = (rank) => {
