@@ -90,8 +90,8 @@ class SimpleResumeAnalyzerTester:
         try:
             # Create valid files but insufficient count
             files = {
-                'job_description': ('job.pdf', b'Job Description Content', 'application/pdf'),
-                'resumes': [('resume.pdf', b'Resume Content', 'application/pdf')] * 5  # Only 5 resumes
+                'job_description': ('job.pdf', 'Job Description Content', 'application/pdf'),
+                'resumes': [('resume.pdf', 'Resume Content', 'application/pdf')] * 5  # Only 5 resumes
             }
             
             response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
