@@ -50,19 +50,61 @@ class ResumeAnalyzerTester:
     
     def create_test_pdf(self, content="Test Resume Content\nJohn Doe\njohn.doe@email.com\n+1-555-123-4567\nSoftware Engineer with 5 years experience"):
         """Create a test PDF file"""
-        try:
-            from reportlab.pdfgen import canvas
-            from reportlab.lib.pagesizes import letter
-            
-            buffer = BytesIO()
-            p = canvas.Canvas(buffer, pagesize=letter)
-            p.drawString(100, 750, content)
-            p.save()
-            buffer.seek(0)
-            return buffer.getvalue()
-        except ImportError:
-            # Fallback: create a simple text file as PDF
-            return content.encode('utf-8')
+        # Simple PDF creation - create a minimal valid PDF structure
+        pdf_content = f"""%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+>>
+endobj
+
+4 0 obj
+<<
+/Length {len(content) + 50}
+>>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+({content}) Tj
+ET
+endstream
+endobj
+
+xref
+0 5
+0000000000 65535 f 
+0000000010 00000 n 
+0000000079 00000 n 
+0000000173 00000 n 
+0000000301 00000 n 
+trailer
+<<
+/Size 5
+/Root 1 0 R
+>>
+startxref
+{400 + len(content)}
+%%EOF"""
+        return pdf_content.encode('utf-8')
     
     def create_test_docx(self, content="Test Resume Content\nJane Smith\njane.smith@email.com\n+1-555-987-6543\nData Scientist with 3 years experience"):
         """Create a test DOCX file"""
