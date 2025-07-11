@@ -140,7 +140,11 @@ class SimpleResumeAnalyzerTester:
         """Test if backend services can be imported and initialized"""
         try:
             import sys
+            import os
             sys.path.append('/app/backend')
+            
+            # Set the GEMINI_API_KEY for testing
+            os.environ['GEMINI_API_KEY'] = 'AIzaSyDomH_bhE817pirH-SBMMPZiwu9NmQHQ2c'
             
             from services.document_parser import DocumentParser
             from services.resume_analyzer import ResumeAnalyzer
