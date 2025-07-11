@@ -12,6 +12,10 @@ from datetime import datetime
 import asyncio
 
 # Import custom services
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent))
+
 from services.document_parser import DocumentParser
 from services.resume_analyzer import ResumeAnalyzer
 
