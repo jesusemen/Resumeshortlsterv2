@@ -62,10 +62,12 @@ class SimpleResumeAnalyzerTester:
     def test_invalid_file_types(self):
         """Test error handling for invalid file types"""
         try:
-            # Create invalid file (txt)
+            # Create invalid file (txt) - using proper tuple format for files
+            invalid_file_data = ('invalid.txt', 'This is a text file')
+            
             files = {
-                'job_description': ('invalid.txt', 'This is a text file', 'text/plain'),
-                'resumes': [('invalid.txt', 'This is a text file', 'text/plain')] * 30
+                'job_description': invalid_file_data,
+                'resumes': [invalid_file_data] * 30
             }
             
             response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
@@ -88,10 +90,13 @@ class SimpleResumeAnalyzerTester:
     def test_insufficient_resumes(self):
         """Test error handling for insufficient resumes (< 30)"""
         try:
-            # Create valid files but insufficient count
+            # Create valid files but insufficient count - using proper tuple format
+            job_file = ('job.pdf', 'Job Description Content')
+            resume_file = ('resume.pdf', 'Resume Content')
+            
             files = {
-                'job_description': ('job.pdf', 'Job Description Content', 'application/pdf'),
-                'resumes': [('resume.pdf', 'Resume Content', 'application/pdf')] * 5  # Only 5 resumes
+                'job_description': job_file,
+                'resumes': [resume_file] * 5  # Only 5 resumes
             }
             
             response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
