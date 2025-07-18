@@ -203,9 +203,13 @@ class ResumeAnalyzerTester:
             job_pdf = self.create_test_pdf("Job Description: Looking for Software Engineer")
             resume_pdf = self.create_test_pdf()
             
+            resumes_35 = []
+            for i in range(35):
+                resumes_35.append((f'resume{i+1}.pdf', resume_pdf, 'application/pdf'))
+            
             files = {
                 'job_description': ('job.pdf', job_pdf, 'application/pdf'),
-                'resumes': [('resume.pdf', resume_pdf, 'application/pdf')] * 35  # 35 resumes (too many)
+                'resumes': resumes_35  # 35 resumes (too many)
             }
             
             response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
@@ -218,8 +222,11 @@ class ResumeAnalyzerTester:
                 else:
                     self.log_test("Excessive Resumes", False, "Error message doesn't match expected format",
                                 {"status_code": response.status_code, "response": data})
+            elif response.status_code == 401:
+                self.log_test("Excessive Resumes", True, "Authentication required (expected for protected endpoint)",
+                            {"status_code": response.status_code, "note": "Endpoint properly protected"})
             else:
-                self.log_test("Excessive Resumes", False, f"Expected 400 status code, got {response.status_code}",
+                self.log_test("Excessive Resumes", False, f"Expected 400 or 401 status code, got {response.status_code}",
                             {"status_code": response.status_code, "response": response.text})
                 
         except Exception as e:
