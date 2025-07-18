@@ -38,16 +38,22 @@ const ResumeAnalyzer = () => {
 
   const handleResumeUpload = (event) => {
     const files = Array.from(event.target.files);
-    if (files.length >= 30) {
+    if (files.length >= 5 && files.length <= 30) {
       setResumes(files);
       toast({
         title: "Resumes Uploaded",
         description: `${files.length} resumes have been uploaded successfully.`,
       });
-    } else {
+    } else if (files.length < 5) {
       toast({
         title: "Insufficient Resumes",
-        description: "Please upload at least 30 resumes for analysis.",
+        description: "Please upload at least 5 resumes for analysis.",
+        variant: "destructive",
+      });
+    } else if (files.length > 30) {
+      toast({
+        title: "Too Many Resumes",
+        description: "Please upload maximum 30 resumes at once.",
         variant: "destructive",
       });
     }
