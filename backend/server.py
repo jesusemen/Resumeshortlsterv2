@@ -177,10 +177,16 @@ async def analyze_resumes(
                 detail="Job description must be a PDF, DOC, or DOCX file"
             )
         
-        if len(resumes) < 30:
+        if len(resumes) < 5:
             raise HTTPException(
                 status_code=400, 
-                detail="At least 30 resumes are required for analysis"
+                detail="At least 5 resumes are required for analysis"
+            )
+        
+        if len(resumes) > 30:
+            raise HTTPException(
+                status_code=400, 
+                detail="Maximum 30 resumes can be processed at once"
             )
         
         # Validate resume file types
