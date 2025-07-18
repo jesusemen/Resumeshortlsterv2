@@ -179,7 +179,7 @@ const ResumeAnalyzer = () => {
             <CardContent>
               <div className="space-y-4">
                 <Label htmlFor="resumes" className="text-sm font-medium">
-                  Select Resume Files (30+ required)
+                  Select Resume Files (5-30 files required)
                 </Label>
                 <Input
                   id="resumes"
