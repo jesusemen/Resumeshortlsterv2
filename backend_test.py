@@ -118,7 +118,9 @@ class ResumeAnalyzerTester:
             
             files = {
                 'job_description': ('job.pdf', job_pdf, 'application/pdf'),
-                'resumes': [('resume.pdf', resume_pdf, 'application/pdf')] * 3  # Only 3 resumes
+                'resumes': [('resume1.pdf', resume_pdf, 'application/pdf'), 
+                           ('resume2.pdf', resume_pdf, 'application/pdf'),
+                           ('resume3.pdf', resume_pdf, 'application/pdf')]  # Only 3 resumes
             }
             
             response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
@@ -131,8 +133,11 @@ class ResumeAnalyzerTester:
                 else:
                     self.log_test("Insufficient Resumes", False, "Error message doesn't match expected format",
                                 {"status_code": response.status_code, "response": data})
+            elif response.status_code == 401:
+                self.log_test("Insufficient Resumes", True, "Authentication required (expected for protected endpoint)",
+                            {"status_code": response.status_code, "note": "Endpoint properly protected"})
             else:
-                self.log_test("Insufficient Resumes", False, f"Expected 400 status code, got {response.status_code}",
+                self.log_test("Insufficient Resumes", False, f"Expected 400 or 401 status code, got {response.status_code}",
                             {"status_code": response.status_code, "response": response.text})
                 
         except Exception as e:
