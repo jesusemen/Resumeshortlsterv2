@@ -152,7 +152,11 @@ class ResumeAnalyzerTester:
             
             files = {
                 'job_description': ('job.pdf', job_pdf, 'application/pdf'),
-                'resumes': [('resume.pdf', resume_pdf, 'application/pdf')] * 5  # Exactly 5 resumes
+                'resumes': [('resume1.pdf', resume_pdf, 'application/pdf'),
+                           ('resume2.pdf', resume_pdf, 'application/pdf'),
+                           ('resume3.pdf', resume_pdf, 'application/pdf'),
+                           ('resume4.pdf', resume_pdf, 'application/pdf'),
+                           ('resume5.pdf', resume_pdf, 'application/pdf')]  # Exactly 5 resumes
             }
             
             response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
@@ -168,9 +172,13 @@ class ResumeAnalyzerTester:
                             {"status_code": response.status_code, "response": response.text[:200]})
             
             # Test with maximum valid count (30 resumes)
+            resumes_30 = []
+            for i in range(30):
+                resumes_30.append((f'resume{i+1}.pdf', resume_pdf, 'application/pdf'))
+            
             files_30 = {
                 'job_description': ('job.pdf', job_pdf, 'application/pdf'),
-                'resumes': [('resume.pdf', resume_pdf, 'application/pdf')] * 30  # Exactly 30 resumes
+                'resumes': resumes_30  # Exactly 30 resumes
             }
             
             response_30 = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files_30)
