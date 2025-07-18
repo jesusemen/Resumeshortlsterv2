@@ -309,8 +309,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All backend tasks completed and tested"
-    - "All frontend authentication and payment integration tasks completed and tested"
+    - "Resume Analyzer 5-30 requirements update completed and tested successfully"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
