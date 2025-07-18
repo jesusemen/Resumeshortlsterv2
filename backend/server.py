@@ -226,10 +226,10 @@ async def analyze_resumes(
         
         logging.info(f"Processing {len(resume_data)} valid resumes for user {current_user.id}")
         
-        if len(resume_data) < 30:
+        if len(resume_data) < 5:
             raise HTTPException(
                 status_code=400, 
-                detail=f"Only {len(resume_data)} resumes could be processed. At least 30 are required."
+                detail=f"Only {len(resume_data)} resumes could be processed. At least 5 are required."
             )
         
         # Analyze resumes using AI
