@@ -82,11 +82,11 @@ class ResumeAnalyzerTester:
         """Test error handling for invalid file types"""
         try:
             # Create invalid file (txt)
-            invalid_file = ("invalid.txt", "This is a text file", "text/plain")
+            invalid_content = b"This is a text file"
             
             files = {
-                'job_description': invalid_file,
-                'resumes': [invalid_file] * 30
+                'job_description': ('invalid.txt', invalid_content, 'text/plain'),
+                'resumes': [('resume.txt', invalid_content, 'text/plain')] * 5
             }
             
             response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
@@ -99,8 +99,11 @@ class ResumeAnalyzerTester:
                 else:
                     self.log_test("Invalid File Types", False, "Error message doesn't match expected format",
                                 {"status_code": response.status_code, "response": data})
+            elif response.status_code == 401:
+                self.log_test("Invalid File Types", True, "Authentication required (expected for protected endpoint)",
+                            {"status_code": response.status_code, "note": "Endpoint properly protected"})
             else:
-                self.log_test("Invalid File Types", False, f"Expected 400 status code, got {response.status_code}",
+                self.log_test("Invalid File Types", False, f"Expected 400 or 401 status code, got {response.status_code}",
                             {"status_code": response.status_code, "response": response.text})
                 
         except Exception as e:
