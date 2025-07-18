@@ -173,7 +173,7 @@ const ResumeAnalyzer = () => {
                 Candidate Resumes
               </CardTitle>
               <CardDescription>
-                Upload candidate resumes (minimum 30 files)
+                Upload candidate resumes (5-30 files required)
               </CardDescription>
             </CardHeader>
             <CardContent>
