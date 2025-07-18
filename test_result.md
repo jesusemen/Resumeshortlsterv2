@@ -307,7 +307,7 @@ metadata:
 test_plan:
   current_focus:
     - "All backend tasks completed and tested"
-    - "Authentication system fully implemented and tested"
+    - "All frontend authentication and payment integration tasks completed and tested"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
