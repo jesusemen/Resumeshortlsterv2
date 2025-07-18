@@ -392,6 +392,8 @@ class ResumeAnalyzerTester:
         self.test_health_check()
         self.test_invalid_file_types()
         self.test_insufficient_resumes()
+        self.test_valid_resume_counts()
+        self.test_excessive_resumes()
         self.test_document_parsing()
         self.test_contact_extraction()
         self.test_analysis_history()
