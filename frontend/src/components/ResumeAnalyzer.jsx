@@ -204,7 +204,7 @@ const ResumeAnalyzer = () => {
         <div className="text-center mb-8">
           <Button
             onClick={handleAnalyze}
-            disabled={!jobDescription || resumes.length < 30 || isAnalyzing}
+            disabled={!jobDescription || resumes.length < 5 || resumes.length > 30 || isAnalyzing}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
           >
             {isAnalyzing ? (
