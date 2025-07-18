@@ -107,23 +107,23 @@ class ResumeAnalyzerTester:
             self.log_test("Invalid File Types", False, f"Request failed: {str(e)}")
     
     def test_insufficient_resumes(self):
-        """Test error handling for insufficient resumes (< 30)"""
+        """Test error handling for insufficient resumes (< 5)"""
         try:
-            # Create valid files but insufficient count
+            # Create valid files but insufficient count (3 resumes)
             job_pdf = self.create_test_pdf("Job Description: Looking for Software Engineer")
             resume_pdf = self.create_test_pdf()
             
             files = {
                 'job_description': ('job.pdf', job_pdf, 'application/pdf'),
-                'resumes': [('resume.pdf', resume_pdf, 'application/pdf')] * 5  # Only 5 resumes
+                'resumes': [('resume.pdf', resume_pdf, 'application/pdf')] * 3  # Only 3 resumes
             }
             
             response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
             
             if response.status_code == 400:
                 data = response.json()
-                if "At least 30 resumes are required" in data.get("detail", ""):
-                    self.log_test("Insufficient Resumes", True, "Correctly rejected insufficient resume count",
+                if "At least 5 resumes are required" in data.get("detail", ""):
+                    self.log_test("Insufficient Resumes", True, "Correctly rejected insufficient resume count (< 5)",
                                 {"status_code": response.status_code, "error": data.get("detail")})
                 else:
                     self.log_test("Insufficient Resumes", False, "Error message doesn't match expected format",
@@ -134,6 +134,80 @@ class ResumeAnalyzerTester:
                 
         except Exception as e:
             self.log_test("Insufficient Resumes", False, f"Request failed: {str(e)}")
+    
+    def test_valid_resume_counts(self):
+        """Test valid resume counts (5-30 resumes)"""
+        try:
+            # Test with minimum valid count (5 resumes)
+            job_pdf = self.create_test_pdf("Job Description: Looking for Software Engineer")
+            resume_pdf = self.create_test_pdf()
+            
+            files = {
+                'job_description': ('job.pdf', job_pdf, 'application/pdf'),
+                'resumes': [('resume.pdf', resume_pdf, 'application/pdf')] * 5  # Exactly 5 resumes
+            }
+            
+            response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
+            
+            if response.status_code == 200:
+                self.log_test("Valid Resume Count (5)", True, "Successfully accepted 5 resumes",
+                            {"status_code": response.status_code})
+            elif response.status_code == 401:
+                self.log_test("Valid Resume Count (5)", True, "Authentication required (expected for protected endpoint)",
+                            {"status_code": response.status_code, "note": "Endpoint properly protected"})
+            else:
+                self.log_test("Valid Resume Count (5)", False, f"Unexpected status code: {response.status_code}",
+                            {"status_code": response.status_code, "response": response.text[:200]})
+            
+            # Test with maximum valid count (30 resumes)
+            files_30 = {
+                'job_description': ('job.pdf', job_pdf, 'application/pdf'),
+                'resumes': [('resume.pdf', resume_pdf, 'application/pdf')] * 30  # Exactly 30 resumes
+            }
+            
+            response_30 = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files_30)
+            
+            if response_30.status_code == 200:
+                self.log_test("Valid Resume Count (30)", True, "Successfully accepted 30 resumes",
+                            {"status_code": response_30.status_code})
+            elif response_30.status_code == 401:
+                self.log_test("Valid Resume Count (30)", True, "Authentication required (expected for protected endpoint)",
+                            {"status_code": response_30.status_code, "note": "Endpoint properly protected"})
+            else:
+                self.log_test("Valid Resume Count (30)", False, f"Unexpected status code: {response_30.status_code}",
+                            {"status_code": response_30.status_code, "response": response_30.text[:200]})
+                
+        except Exception as e:
+            self.log_test("Valid Resume Counts", False, f"Request failed: {str(e)}")
+    
+    def test_excessive_resumes(self):
+        """Test error handling for too many resumes (> 30)"""
+        try:
+            # Create valid files but excessive count (35 resumes)
+            job_pdf = self.create_test_pdf("Job Description: Looking for Software Engineer")
+            resume_pdf = self.create_test_pdf()
+            
+            files = {
+                'job_description': ('job.pdf', job_pdf, 'application/pdf'),
+                'resumes': [('resume.pdf', resume_pdf, 'application/pdf')] * 35  # 35 resumes (too many)
+            }
+            
+            response = self.session.post(f"{self.base_url}/api/analyze-resumes", files=files)
+            
+            if response.status_code == 400:
+                data = response.json()
+                if "Maximum 30 resumes can be processed" in data.get("detail", ""):
+                    self.log_test("Excessive Resumes", True, "Correctly rejected excessive resume count (> 30)",
+                                {"status_code": response.status_code, "error": data.get("detail")})
+                else:
+                    self.log_test("Excessive Resumes", False, "Error message doesn't match expected format",
+                                {"status_code": response.status_code, "response": data})
+            else:
+                self.log_test("Excessive Resumes", False, f"Expected 400 status code, got {response.status_code}",
+                            {"status_code": response.status_code, "response": response.text})
+                
+        except Exception as e:
+            self.log_test("Excessive Resumes", False, f"Request failed: {str(e)}")
     
     def test_document_parsing(self):
         """Test document parsing functionality"""
