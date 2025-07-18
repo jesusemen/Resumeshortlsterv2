@@ -60,10 +60,10 @@ const ResumeAnalyzer = () => {
   };
 
   const handleAnalyze = async () => {
-    if (!jobDescription || resumes.length < 30) {
+    if (!jobDescription || resumes.length < 5 || resumes.length > 30) {
       toast({
-        title: "Missing Files",
-        description: "Please upload both job description and at least 30 resumes.",
+        title: "Missing or Invalid Files",
+        description: "Please upload a job description and 5-30 resumes.",
         variant: "destructive",
       });
       return;
