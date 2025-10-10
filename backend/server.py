@@ -36,7 +36,7 @@ load_dotenv(ROOT_DIR / '.env')
 # MongoDB connection
 mongo_url = os.environ['mongodb+srv://resume_analyzer:rezumay@cluster0.hckjgct.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0']
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[os.environ['resume_analyzer']]
 
 # Create the main app
 app = FastAPI()
