@@ -24,11 +24,17 @@ from auth.models import UserCreate, UserLogin, UserResponse, UserInDB, Token
 from auth.auth_handler import verify_password, get_password_hash, create_access_token
 from auth.dependencies import get_current_user
 
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
+mongo_url = os.environ['mongodb+srv://resume_analyzer:rezumay@cluster0.hckjgct.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
