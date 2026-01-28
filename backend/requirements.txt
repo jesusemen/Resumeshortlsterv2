@@ -26,3 +26,5 @@ fastapi==0.110.1
     PyPDF2
     python-docx
     bcrypt>=4.0.1
+    emergentintegrations
+
