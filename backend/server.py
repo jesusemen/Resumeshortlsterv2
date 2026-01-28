@@ -24,10 +24,25 @@ from auth.models import UserCreate, UserLogin, UserResponse, UserInDB, Token
 from auth.auth_handler import verify_password, get_password_hash, create_access_token
 from auth.dependencies import get_current_user
 
+import os
+import uvicorn
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def health():
+    return {"status": "ok"}
+
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
+
+# if __name__ == "__main__":
+#     import os
+#     port = int(os.environ.get("PORT", 5000))
+#     app.run(host="0.0.0.0", port=port)
 
 
 ROOT_DIR = Path(__file__).parent
